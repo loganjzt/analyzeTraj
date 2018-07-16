@@ -5,7 +5,11 @@
 #include <cstring>
 #include <fstream>
 #include <ctime>
+<<<<<<< HEAD
 
+=======
+#include <malloc.h>
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 #include </usr/include/xdrfile/xdrfile_trr.h> // xdr include file 
 #include </usr/include/xdrfile/xdrfile_xtc.h> // xdr include file 
 
@@ -222,9 +226,15 @@ int main(int argc, char **argv){
 	double **pzz;
 	double **pxx;
 	double **pyy;
+<<<<<<< HEAD
 		pxx = new double * [nframe];
 		pyy = new double * [nframe];
 		pzz = new double * [nframe];
+=======
+		pzz = (double **)malloc(sizeof(double *)*nframe);	
+		pxx = (double **)malloc(sizeof(double *)*nframe);	
+		pyy = (double **)malloc(sizeof(double *)*nframe);	
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 
 //	double pzzTime,pxxTime,pyyTime;
 
@@ -237,9 +247,15 @@ int main(int argc, char **argv){
 	//read xtc files
 	read_trr_natoms(argv[1],&natoms);
 
+<<<<<<< HEAD
 	coor = new rvec [natoms];
 	vel = new rvec [natoms];
 	force = new rvec [natoms];
+=======
+	coor = (rvec *)malloc(natoms*sizeof(rvec));
+	vel = (rvec *)malloc(natoms*sizeof(rvec));
+	force = (rvec *)malloc(natoms*sizeof(rvec));
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 
 	//open xtc file and loop through each frame
 	xd=xdrfile_open(argv[1],"r");
@@ -253,9 +269,15 @@ int main(int argc, char **argv){
 			zbin = int(box[2][2]/binSize);
 			vSlab = binSize*box[0][0]*box[1][1];
 			for(i=0;i<nframe;i++){
+<<<<<<< HEAD
 				pxx[i] = new double [zbin];
 				pyy[i] = new double [zbin];
 				pzz[i] = new double [zbin];
+=======
+				pzz[i] = (double *)malloc(sizeof(double)*zbin);
+				pxx[i] = (double *)malloc(sizeof(double)*zbin);
+				pyy[i] = (double *)malloc(sizeof(double)*zbin);
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 				for(j=0;j<zbin;j++){
 					pzz[i][j] = 0.0;
 					pxx[i][j] = 0.0;

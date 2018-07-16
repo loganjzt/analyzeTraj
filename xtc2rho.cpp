@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Oct 11, 2017 
  * modified for 3 dimensions (averaged over the rest two directions) 
  * -- zhitong
@@ -9,16 +10,26 @@
  * -- zhitong
  */ 		
 
+=======
+// Modified on Oct 11 for 3 dimension
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <cstring>
 #include <fstream>
 #include <ctime>
+<<<<<<< HEAD
 #include </usr/include/xdrfile/xdrfile_trr.h> // xdr include file 
 #include </usr/include/xdrfile/xdrfile_xtc.h> // xdr include file 
 
 #include "/home/zhitongj/Git/traj2rho/getZs.cpp"	// move the c.o.m of the system to the center of the box
+=======
+#include <malloc.h>
+#include </usr/include/xdrfile/xdrfile_trr.h> // xdr include file 
+#include </usr/include/xdrfile/xdrfile_xtc.h> // xdr include file 
+#include "/home/zhitongj/Git/xtc2rho/getZs.cpp"
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 
 
     using namespace std;
@@ -26,6 +37,7 @@
 
 int main(int argc, char **argv){
 	
+<<<<<<< HEAD
 	int ifTrr;		// index for input files type. 1 = .trr, 0 = .xtc
 	
 	if( argv[1][int(sizeof(argv[1])/sizeof(char)) - 1] == 'r' ){
@@ -41,6 +53,8 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
+=======
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	// input variables
 	int firstframe = 500;				
 	if(argc >= 3) firstframe = atoi(argv[2]);
@@ -55,16 +69,24 @@ int main(int argc, char **argv){
 	printf("# last frame = %d \n",lastframe);
 	printf("# atoms per molecules= %d \n",natomPmol);
 
+<<<<<<< HEAD
 
 	// XTC variables
 	XDRFILE *xd;		// the xtc file
 	int natoms;	// number of total atoms
 
+=======
+	// XTC variables
+	XDRFILE *xd;		// the xtc file
+
+	int natoms;	// number of total atoms
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	int step;		// the step counter for the simulation
 	float time;		// simulation time
 
 	matrix box;		// box coordinates in a 3x3 matrix
 	rvec *coor;		// atom coordinates in a 2-D matrix
+<<<<<<< HEAD
 
 	/*read xtc files*/
 	if(ifTrr == 1) read_trr_natoms(argv[1],&natoms);
@@ -79,6 +101,13 @@ int main(int argc, char **argv){
 	float prec;	
 	coor = new rvec [natoms];
 
+=======
+	rvec *vel;		// atom coordinates in a 2-D matrix
+	rvec *force;		// atom coordinates in a 2-D matrix
+	float lambda;
+//	float prec;	
+	
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	//other variables
 	int i,k;
 	
@@ -91,6 +120,7 @@ int main(int argc, char **argv){
 	double zs,xs,ys;
 	double *rhoZ,*rhoX,*rhoY;
 
+<<<<<<< HEAD
 	//open xtc file and loop through each frame
 	xd=xdrfile_open(argv[1],"r");
 	k = 0;
@@ -204,11 +234,75 @@ int main(int argc, char **argv){
 
 	printf("# Finish reading .trr file...\n");
 	printf("# Counted frame = %d...\n",k);
+=======
+	/*read xtc files*/
+	read_trr_natoms(argv[1],&natoms);
+
+	coor = (rvec *)malloc(natoms*sizeof(rvec));
+	vel = (rvec *)malloc(natoms*sizeof(rvec));
+	force = (rvec *)malloc(natoms*sizeof(rvec));
+
+	//open xtc file and loop through each frame
+	xd=xdrfile_open(argv[1],"r");
+	k = 0;
+	while( ! read_trr(xd, natoms, &step, &time, &lambda, box, coor, vel, force)){
+		if(coor == 0){
+			printf("Insufficient memory to load .trr file. \n");
+			return 1;
+		}
+		if(step == 0){
+			xbin = int(box[0][0]/binSize);
+			ybin = int(box[1][1]/binSize);
+			zbin = int(box[2][2]/binSize);
+
+			printf("# of atoms = %d\n# Xbin = %d\n# Ybin = %d\n# Zbin = %d\n",natoms,xbin,ybin,zbin);
+
+			rhoX = (double *)malloc(sizeof(double)*xbin);
+			rhoY = (double *)malloc(sizeof(double)*ybin);
+			rhoZ = (double *)malloc(sizeof(double)*zbin);
+
+			for(i=0;i<xbin;i++) rhoX[i] = 0.0;
+			for(i=0;i<ybin;i++) rhoY[i] = 0.0;
+			for(i=0;i<zbin;i++) rhoZ[i] = 0.0;
+			printf("# natoms / zbin = %d\n",natoms/zbin);
+
+		}
+
+	    if(time >= firstframe && ( time <= lastframe || lastframe < firstframe ) ){
+				
+			if(int(time*10)%1000 == 0) printf("time = %.2f\n",time);
+
+			// X direction
+			xs = getZs(coor,box,binSize,natoms,natomPmol,'x');	
+			for(i=0;i<natoms/natomPmol;i++){
+				if(coor[i*natomPmol][0] - xs >= 0) rhoX[int((coor[i*natomPmol][0] - xs )/binSize)] += 1.0;
+				else rhoX[int((coor[i*natomPmol][0] - xs + box[0][0])/binSize)] += 1.0;
+			}
+
+			// Y direction
+			ys = getZs(coor,box,binSize,natoms,natomPmol,'y');
+			for(i=0;i<natoms/natomPmol;i++){
+				if(coor[i*natomPmol][1] - ys >= 0) rhoY[int((coor[i*natomPmol][1] - ys )/binSize)] += 1.0;
+				else rhoY[int((coor[i*natomPmol][1] - ys + box[1][1])/binSize)] += 1.0;
+			}
+
+			// Z direction
+			zs = getZs(coor,box,binSize,natoms,natomPmol,'z');		// get comZ in each configuration
+			for(i=0;i<natoms/natomPmol;i++){
+				if(coor[i*natomPmol][2] - zs >= 0) rhoZ[int((coor[i*natomPmol][2] - zs )/binSize)] += 1.0;
+				else rhoZ[int((coor[i*natomPmol][2] - zs + box[2][2])/binSize)] += 1.0;
+			}
+
+			k++;
+	    }
+	}
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 
 	for(i=0;i<xbin;i++) rhoX[i] = rhoX[i]/double(k)/box[2][2]/box[1][1]/binSize;
 	for(i=0;i<ybin;i++) rhoY[i] = rhoY[i]/double(k)/box[0][0]/box[2][2]/binSize;
 	for(i=0;i<zbin;i++) rhoZ[i] = rhoZ[i]/double(k)/box[0][0]/box[1][1]/binSize;
 	
+<<<<<<< HEAD
 
 	double nCheck;			// integral of rhoZ to check the area under the curve	
 	double rhoMin,rhoMax;	// get the max and min value of rho
@@ -222,6 +316,21 @@ int main(int argc, char **argv){
 	nCheck = 0.0;
 	rhoMin = rhoX[0];
 	rhoMax = rhoX[0];
+=======
+	printf("# Finish reading .trr file...\n");
+	printf("# Counted frame = %d...\n",k);
+
+	double nCheck;	// integral of rhoZ to check the area under the curve	
+	double rhoMin,rhoMax;	// get the max and min value of rho
+
+	rhoMin = rhoX[0];
+	rhoMax = rhoX[0];
+	sprintf(f,"rho_x.dat");
+	data = fopen(f,"w");
+	fprintf(data,"# x\tRhox\tint Rhox\n");
+
+	nCheck = 0.0;
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	for(i=0;i<xbin;i++){
 		if(i<xbin-1) nCheck += (rhoX[i] + rhoX[i+1])/2.0*double(binSize);
 		fprintf(data,"%.3f\t%e\t%e\n",i*binSize,rhoX[i],nCheck);
@@ -230,14 +339,23 @@ int main(int argc, char **argv){
 	}
 	fprintf(data,"# rhoMax = %f\n# rhoMin = %f\n",rhoMax,rhoMin);
 
+<<<<<<< HEAD
 	// output rho(y)
+=======
+
+	rhoMin = rhoY[0];
+	rhoMax = rhoY[0];
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	sprintf(f,"rho_y.dat");
 	data = fopen(f,"w");
 	fprintf(data,"# y\tRhoy\tint Rhoy\n");
 
 	nCheck = 0.0;
+<<<<<<< HEAD
 	rhoMin = rhoY[0];
 	rhoMax = rhoY[0];
+=======
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	for(i=0;i<ybin;i++){
 		if(i<ybin-1) nCheck += (rhoY[i] + rhoY[i+1])/2.0*double(binSize);
 		fprintf(data,"%.3f\t%e\t%e\n",i*binSize,rhoY[i],nCheck);
@@ -247,7 +365,10 @@ int main(int argc, char **argv){
 	fprintf(data,"# rhoMax = %f\n# rhoMin = %f\n",rhoMax,rhoMin);
 
 
+<<<<<<< HEAD
 	// output rho(x)
+=======
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
 	sprintf(f,"rho_z.dat");
 	data = fopen(f,"w");
 	fprintf(data,"# z\tRhoz\tint Rhoz\n");
@@ -291,3 +412,7 @@ int main(int argc, char **argv){
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 614e996c3a1c6b0407f2564883787385df426547
